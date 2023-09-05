@@ -5,4 +5,3 @@ from assign_projects.project_assigner import ProjectAssigner
 
 if __name__ == "__main__":
     standard_main(input_schema, solution_schema, ProjectAssigner.static_solve)
-    

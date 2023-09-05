@@ -1,4 +1,4 @@
-from ticdat import TicDatFactory, standard_main
+from ticdat import TicDatFactory
 
 # Define the input schema
 student_fields = ["First Name", "Last Name", "First Choice", "Second Choice",
@@ -9,10 +9,10 @@ input_schema = TicDatFactory (
 )
 
 # Define the foreign key relationships
-input_schema.add_foreign_key("students", "project", ["First Choice", "Name"])
-input_schema.add_foreign_key("students", "project", ["Second Choice", "Name"])
-input_schema.add_foreign_key("students", "project", ["Third Choice", "Name"])
-input_schema.add_foreign_key("students", "project", ["Last Choice", "Name"])
+input_schema.add_foreign_key("students", "projects", ["First Choice", "Name"])
+input_schema.add_foreign_key("students", "projects", ["Second Choice", "Name"])
+input_schema.add_foreign_key("students", "projects", ["Third Choice", "Name"])
+input_schema.add_foreign_key("students", "projects", ["Last Choice", "Name"])
 
 # Define the data types
 input_schema.set_data_type("projects", "Min Capacity", must_be_int=True)
@@ -20,7 +20,8 @@ input_schema.set_data_type("projects", "Max Capacity", must_be_int=True)
 input_schema.set_data_type("projects", "Even Numbered", must_be_int=True, max=1,
                            inclusive_max=True)
 for f in student_fields:
-    input_schema.set_data_type("students", f, number_allowed=False, strings_allowed="*")
+    input_schema.set_data_type("students", f, number_allowed=False, strings_allowed="*",
+                               nullable=True)
 
 # We also want to ensure that Max Capacity is at least Min Capacity
 input_schema.add_data_row_predicate(
@@ -29,6 +30,6 @@ input_schema.add_data_row_predicate(
 
 # define the output schema
 solution_schema = TicDatFactory(
-    assignments=[["Email"], ["First Name", "Last Name", "Project"]],
-    priority=[["Email"], ["First Name", "Last Name", "Assigned Choice"]],
+    assignments=[["Email"], ["First Name", "Last Name", "Project", "Assigned Choice"]],
+    projects=[["Name"], ["Number Assigned"]],
 )

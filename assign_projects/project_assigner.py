@@ -1,6 +1,6 @@
 import gurobipy as gu
 
-from schemas import input_schema, solution_schema
+from assign_projects.schemas import input_schema, solution_schema
 
 
 class ProjectAssigner:
@@ -36,7 +36,9 @@ class ProjectAssigner:
         """
 
         assert input_schema.good_tic_dat_object(dat)
-        assert not input_schema.find_foreign_key_failures(dat)
+        for fkk in input_schema.find_foreign_key_failures(dat).values():
+            # ignore foreign key failures from empty entries
+            assert fkk.native_values == (None, )
         assert not input_schema.find_data_type_failures(dat)
         assert not input_schema.find_data_row_failures(dat)
 
@@ -64,7 +66,7 @@ class ProjectAssigner:
 
         # y represents half the sum of the students assigned to project
         y = {project: mdl.addVar(vtype=gu.GRB.INTEGER, name=f"half_sum_{project}")
-             for project, f in self.dat.projects.items if f["Even Numbered"]}
+             for project, f in self.dat.projects.items() if f["Even Numbered"]}
 
         # set objective
         # minimize the penalty incurred from the assignment
@@ -93,7 +95,7 @@ class ProjectAssigner:
 
         return mdl, x
 
-    def solve(self):
+    def solve(self) -> solution_schema.TicDat:
         """ Solves an integer program to assign students to class projects
 
         :return: a TicDat assigning students to projects
@@ -115,14 +117,16 @@ class ProjectAssigner:
                 sln.assignments[student] = {
                     "First Name": self.dat.students[student]["First Name"],
                     "Last Name": self.dat.students[student]["Last Name"],
-                    "Project": project
-                }
-                sln.priority[student] = {
-                    "First Name": self.dat.students[student]["First Name"],
-                    "Last Name": self.dat.students[student]["Last Name"],
+                    "Project": project,
                     "Assigned Choice": "First Choice" if project == self.dat.students[student]["First Choice"]
                     else "Second Choice" if project == self.dat.students[student]["Second Choice"]
                     else "Third Choice" if project == self.dat.students[student]["Third Choice"]
                     else "Last Choice" if project == self.dat.students[student]["Last Choice"]
                     else "Other Choice"
                 }
+        for project in self.dat.projects:
+            sln.projects[project] = {
+                "Number Assigned": sum(self.x[student, project].x for student in self.dat.students)
+            }
+
+        return sln
