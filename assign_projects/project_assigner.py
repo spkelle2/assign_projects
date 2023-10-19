@@ -42,12 +42,24 @@ class ProjectAssigner:
         assert not input_schema.find_data_type_failures(dat)
         assert not input_schema.find_data_row_failures(dat)
 
+        # make sure Previous Assignment and Previous Choice are either all null or all non-null
+        optional_columns = ["Previous Assignment", "Previous Choice"]
+        all_null = all(all(f[col_name] is None for f in dat.students.values())
+                       for col_name in optional_columns)
+        all_non_null = all(all(f[col_name] is not None for f in dat.students.values())
+                           for col_name in optional_columns)
+        assert all_null or all_non_null, f'Entries among {optional_columns[:-1]} ' \
+            f'and {optional_columns[-1]} must be collectively null or collectively non-null'
+
     def create_model(self) -> tuple[gu.Model, dict[tuple[str, str], gu.Var]]:
         """ Creates an integer program to assign students to class projects
 
         :return: the model object and a dictionary mapping student-project
         pairings to a binary variable
         """
+        previous_assignments = any(f["Previous Assignment"] is not None for f in
+                                   self.dat.students.values())
+
         # convert student preferences to penalty weights for the objective
         penalty = {
             (student, project): 0 if f["First Choice"] == project else 1 if
@@ -55,6 +67,18 @@ class ProjectAssigner:
             else 4 if f["Last Choice"] == project else 3
             for student, f in self.dat.students.items() for project in self.dat.projects
         }
+
+        # now scale the penalties accounting for previous assignments
+        if previous_assignments:
+            for student, f in self.dat.students.items():
+                for project in self.dat.projects:
+                    # highest priority to students who submit survey and got third choice or lower
+                    # next priority to students who submit survey and got second choice
+                    # then priority to those who forgot to submit survey and finally those who got first choice
+                    penalty[student, project] *= 1 if f["Previous Choice"] in \
+                        ["First Choice", "Did Not Submit Second Survey"] \
+                        else 2 if f["Previous Choice"] == "Did Not Submit First Survey" \
+                        else 3 if f["Previous Choice"] == "Second Choice" else 4
 
         # create model
         mdl = gu.Model("assign_projects")
@@ -83,15 +107,21 @@ class ProjectAssigner:
             mdl.addConstr(gu.quicksum(x[student, project] for student in self.dat.students)
                           <= f["Max Capacity"], name=f"{project}_max_cap")
 
+            # 2) some projects require an even number of students to be assigned
             if f["Even Numbered"]:
-                # 2) some projects require an even number of students to be assigned
                 mdl.addConstr(gu.quicksum(x[student, project] for student in self.dat.students)
                               == 2 * y[project], name=f"even_numbered_{project}")
 
-        # 3) each student must be assigned to exactly one project
-        for student in self.dat.students:
+        for student, f in self.dat.students.items():
+
+            # 3) each student must be assigned to exactly one project
             mdl.addConstr(gu.quicksum(x[student, project] for project in self.dat.projects) == 1,
                           name=f"{student}_assignment")
+
+            # 4) no student can be assigned to their previous project
+            if previous_assignments:
+                mdl.addConstr(x[student, f["Previous Assignment"]] == 0,
+                              name=f"{student}_previous_assignment")
 
         return mdl, x
 
