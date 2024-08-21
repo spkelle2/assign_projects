@@ -6,7 +6,7 @@ student_fields = ["First Name", "Last Name", "First Choice", "Second Choice",
 input_schema = TicDatFactory(
     projects=[["Name"], ["Min Capacity", "Max Capacity", "Even Numbered"]],
     students=[["Email"], student_fields + ["Previous Choice"]]
-)
+)  # previous choice is what choice was the previous assignment
 
 # Define the foreign key relationships
 input_schema.add_foreign_key("students", "projects", ["First Choice", "Name"])
