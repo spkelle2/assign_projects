@@ -14,12 +14,12 @@ class TestProjectAssigner(unittest.TestCase):
         self.sln_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_solutions')
 
         # read first placement inputs and expected solutions
-        self.first_dat = input_schema.csv.create_tic_dat(os.path.join(self.input_dir, "first_placement"))
-        self.first_sln = solution_schema.csv.create_tic_dat(os.path.join(self.sln_dir, "first_placement"))
+        self.first_dat = input_schema.csv.create_tic_dat(os.path.join(self.input_dir, "first_assignment"))
+        self.first_sln = solution_schema.csv.create_tic_dat(os.path.join(self.sln_dir, "first_assignment"))
 
         # read second placement inputs and expected solutions
-        self.second_dat = input_schema.csv.create_tic_dat(os.path.join(self.input_dir, "second_placement"))
-        self.second_sln = solution_schema.csv.create_tic_dat(os.path.join(self.sln_dir, "second_placement"))
+        self.second_dat = input_schema.csv.create_tic_dat(os.path.join(self.input_dir, "second_assignment"))
+        self.second_sln = solution_schema.csv.create_tic_dat(os.path.join(self.sln_dir, "second_assignment"))
 
     def test_solve(self):
         """ check that the total penalty for each run matches the value we expect.

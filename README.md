@@ -1,19 +1,39 @@
+# project_assigner
 
+### Installation
+1. Install [miniconda](https://docs.conda.io/en/latest/miniconda.html) if you
+haven't already.
+2. Clone this repository.
+3. From this project's root directory, create a conda environment from the `environment.yml` file:
+    ```bash
+    conda env create -f environment.yml
+    ```
+4. Get a free academic gurobi [license](https://www.gurobi.com/academia/academic-program-and-licenses/).
+You can skip the parts on installing Gurobi as the conda environment handled that.
 
-install mini/conda
+### Usage
+1. Activate the conda environment:
+    ```bash
+    conda activate project_assigner
+    ```
+2. Create a directory `<path/to/input>` to store the input data files `students.csv`
+and `projects.csv`. Input data files should adhere to the data model provided in
+`project_assigner/schemas.py`. See `test_assign_projects/test_inputs/first_assignment`
+and `test_assign_projects/test_inputs/second_assignment` for examples.
+3. From this project's root directory, run the script:
+    ```bash
+    python main.py --input <path/to/input> --output <path/to/output>
+    ```
+    For example:
+    ```bash
+    python main.py --input test_assign_projects/test_inputs/first_assignment --output example_output
+    ```
 
-create conda environment with environment.yml
-
-you can skip installing gurobi if asked to in next step as conda took care of it
-
-get gurobi academic license (https://www.gurobi.com/academia/academic-program-and-licenses/)
-
-
-command line call "python main.py --input <path to input file or folder> --output <path to output file or folder>"
-
-previous assignment and previous choice need to be there - even if they aren't being used (e.g. for the first placement)
-
-gurobipy.GurobiError: Version number is 11.0, license is for version 10.0
-make sure you have a gurobi license as late as the version you installed
-
-you may need to be on your university's network to get your license
+### Common Errors
+* To get your Gurobi academic license, you may need to be connected to your
+institution's network or create your account with your institution's email.
+* If you get an error like "Version number is 11.0, license is for version 10.0"
+or "license is expired", try repeating step 4 of Installation
+* If you get an error saying "Previous Assignment" or "Previous Choice" are missing
+from the students table, add them to the table and try again. It's ok for the columns
+to be empty, but the header is required.
