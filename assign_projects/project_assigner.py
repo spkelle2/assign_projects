@@ -51,16 +51,9 @@ class ProjectAssigner:
         assert all_null or all_non_null, f'Entries among {optional_columns[:-1]} ' \
             f'and {optional_columns[-1]} must be collectively null or collectively non-null'
 
-    def create_model(self) -> tuple[gu.Model, dict[tuple[str, str], gu.Var]]:
-        """ Creates an integer program to assign students to class projects
+    def _get_penalty(self, previous_assignments) -> dict[tuple[str, str], int]:
+        """ Creates a dictionary mapping student-project pairings to a penalty weight"""
 
-        :return: the model object and a dictionary mapping student-project
-        pairings to a binary variable
-        """
-        previous_assignments = any(f["Previous Assignment"] is not None for f in
-                                   self.dat.students.values())
-
-        # convert student preferences to penalty weights for the objective
         penalty = {
             (student, project): 0 if f["First Choice"] == project else 1 if
             f["Second Choice"] == project else 2 if f["Third Choice"] == project
@@ -76,9 +69,23 @@ class ProjectAssigner:
                     # next priority to students who submit survey and got second choice
                     # then priority to those who forgot to submit survey and finally those who got first choice
                     penalty[student, project] *= 1 if f["Previous Choice"] in \
-                        ["First Choice", "Did Not Submit Second Survey"] \
+                                                      ["First Choice", "Did Not Submit Second Survey"] \
                         else 2 if f["Previous Choice"] == "Did Not Submit First Survey" \
                         else 3 if f["Previous Choice"] == "Second Choice" else 4
+
+        return penalty
+
+    def create_model(self) -> tuple[gu.Model, dict[tuple[str, str], gu.Var]]:
+        """ Creates an integer program to assign students to class projects
+
+        :return: the model object and a dictionary mapping student-project
+        pairings to a binary variable
+        """
+        previous_assignments = any(f["Previous Assignment"] is not None for f in
+                                   self.dat.students.values())
+
+        # convert student preferences to penalty weights for the objective
+        penalty = self._get_penalty(previous_assignments)
 
         # create model
         mdl = gu.Model("assign_projects")

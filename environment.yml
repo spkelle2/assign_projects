@@ -1,0 +1,13 @@
+name: assign_projects
+channels:
+  - conda-forge
+  - defaults
+  - gurobi
+dependencies:
+  - gurobi
+  - pandas
+  - python
+  - pip
+  - pip:
+    - ticdat
+  - xlrd

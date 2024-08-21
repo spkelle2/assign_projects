@@ -21,20 +21,37 @@ class TestProjectAssigner(unittest.TestCase):
         self.second_dat = input_schema.csv.create_tic_dat(os.path.join(self.input_dir, "second_placement"))
         self.second_sln = solution_schema.csv.create_tic_dat(os.path.join(self.sln_dir, "second_placement"))
 
-    def test_static_solve(self):
+    def test_solve(self):
+        """ check that the total penalty for each run matches the value we expect.
+        There can be many assignments that are equally "good" so it's ok if which
+        project each student is assigned to or the number of students assigned
+        to each project changes between runs.
+
+        :return:
+        """
         # check first model created nets expected results
-        sln1 = ProjectAssigner.static_solve(self.first_dat)
-        for dept, f in sln1.projects.items():
-            # which students get assigned to which department can change but
-            # the total number of students assigned to each department should not
-            self.assertEqual(f['Number Assigned'], self.first_sln.projects[dept]['Number Assigned'])
+        project_assigner = ProjectAssigner(self.first_dat)
+        sln = project_assigner.solve()
+        penalty = project_assigner._get_penalty(False)
+        reported_objective = sum(penalty[student, f["Project"]] for student, f
+                                 in sln.assignments.items())
+        expected_objective = sum(penalty[student, f["Project"]] for student, f
+                                 in self.first_sln.assignments.items())
+        actual_objective = project_assigner.mdl.ObjVal
+        self.assertEqual(reported_objective, actual_objective)
+        self.assertEqual(expected_objective, actual_objective)
 
         # check second model created nets expected results
-        sln2 = ProjectAssigner.static_solve(self.second_dat)
-        for dept, f in sln2.projects.items():
-            # which students get assigned to which department can change but
-            # the total number of students assigned to each department should not
-            self.assertEqual(f['Number Assigned'], self.second_sln.projects[dept]['Number Assigned'])
+        project_assigner = ProjectAssigner(self.second_dat)
+        sln = project_assigner.solve()
+        penalty = project_assigner._get_penalty(True)  # we have previous assignments this time
+        reported_objective = sum(penalty[student, f["Project"]] for student, f
+                                 in sln.assignments.items())
+        expected_objective = sum(penalty[student, f["Project"]] for student, f
+                                in self.second_sln.assignments.items())
+        actual_objective = project_assigner.mdl.ObjVal
+        self.assertEqual(reported_objective, actual_objective)
+        self.assertEqual(expected_objective, actual_objective)
 
 
 if __name__ == '__main__':
