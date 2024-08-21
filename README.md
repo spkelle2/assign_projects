@@ -1,4 +1,12 @@
 # project_assigner
+The purpose of this repository is to provide a python package for assigning students to
+class projects. A user inputs a csv of students with their project preferences
+and a csv of projects with their capacities. The package formulates and solves
+a mixed-integer linear program to maximize the overall student satisfaction.
+The package outputs a csv of the student-project assignments as well as the total
+number of students assigned to each project. Details on installing and running
+the package can be found below.
+
 
 ### Installation
 1. Install [miniconda](https://docs.conda.io/en/latest/miniconda.html) if you
