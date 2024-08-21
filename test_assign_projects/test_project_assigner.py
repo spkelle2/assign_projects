@@ -33,10 +33,13 @@ class TestProjectAssigner(unittest.TestCase):
         project_assigner = ProjectAssigner(self.first_dat)
         sln = project_assigner.solve()
         penalty = project_assigner._get_penalty(False)
+        # the minimal penalty we recorded that the solver found this run
         reported_objective = sum(penalty[student, f["Project"]] for student, f
                                  in sln.assignments.items())
+        # the minimal penalty we recorded that the solver found in our saved solution
         expected_objective = sum(penalty[student, f["Project"]] for student, f
                                  in self.first_sln.assignments.items())
+        # the minimal penalty the solver found
         actual_objective = project_assigner.mdl.ObjVal
         self.assertEqual(reported_objective, actual_objective)
         self.assertEqual(expected_objective, actual_objective)
@@ -45,10 +48,13 @@ class TestProjectAssigner(unittest.TestCase):
         project_assigner = ProjectAssigner(self.second_dat)
         sln = project_assigner.solve()
         penalty = project_assigner._get_penalty(True)  # we have previous assignments this time
+        # the minimal penalty we recorded that the solver found this run
         reported_objective = sum(penalty[student, f["Project"]] for student, f
                                  in sln.assignments.items())
+        # the minimal penalty we recorded that the solver found in our saved solution
         expected_objective = sum(penalty[student, f["Project"]] for student, f
                                 in self.second_sln.assignments.items())
+        # the minimal penalty the solver found
         actual_objective = project_assigner.mdl.ObjVal
         self.assertEqual(reported_objective, actual_objective)
         self.assertEqual(expected_objective, actual_objective)
