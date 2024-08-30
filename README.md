@@ -30,7 +30,10 @@ sure to run the `grbgetkey` command.
 2. Create a directory `<path/to/input>` to store the input data files `students.csv`
 and `projects.csv`. Input data files should adhere to the data model provided in
 `project_assigner/schemas.py`. See `test_assign_projects/test_inputs/first_assignment`
-and `test_assign_projects/test_inputs/second_assignment` for examples.
+and `test_assign_projects/test_inputs/second_assignment` for examples. When creating
+input data files, some students inevitably don't give their preferences. You'll need
+to manually (e.g. with excel vlookup) add each missing student, and it's ok if their
+preference columns are empty.
 3. From this project's root directory, run the script:
     ```bash
     python main.py --input <path/to/input> --output <path/to/output>
