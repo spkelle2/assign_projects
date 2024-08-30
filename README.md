@@ -10,14 +10,17 @@ the package can be found below.
 
 ### Installation
 1. Install [miniconda](https://docs.conda.io/en/latest/miniconda.html) if you
-haven't already.
+haven't already. Make sure it has been added to path and that it is activated.
+You'll know this is the case when you open a terminal tab and you see `(base)`
+next to your working directory.
 2. Clone this repository.
 3. From this project's root directory, create a conda environment from the `environment.yml` file:
     ```bash
     conda env create -f environment.yml
     ```
 4. Get a free academic gurobi [license](https://www.gurobi.com/academia/academic-program-and-licenses/).
-You can skip the parts on installing Gurobi as the conda environment handled that.
+You can skip the parts on installing Gurobi as the conda environment handled that. You just need to make
+sure to run the `grbgetkey` command.
 
 ### Usage
 1. Activate the conda environment:
